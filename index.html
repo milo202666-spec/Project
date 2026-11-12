@@ -76,8 +76,6 @@
   body.wide .app{max-width:1180px}
   .slides{padding:16px}
 
-  @keyframes inR{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:none}}
-  @keyframes inL{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:none}}
   .slidebar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
   .slidebar .btn{padding:10px 18px;font-size:1rem}
   .btn:disabled{opacity:.35;cursor:default;transform:none}
@@ -94,8 +92,6 @@
   .sl-scale{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0}
   .sl{position:absolute;inset:0;display:none;color:#fff;font-family:"Times New Roman","Noto Serif Myanmar","Myanmar Text","Padauk",serif;font-weight:700;overflow:hidden}
   .sl.on{display:block}
-  .sl.on.fromR{animation:inR .35s ease-out}
-  .sl.on.fromL{animation:inL .35s ease-out}
   .sl.teal{background:radial-gradient(900px 600px at 50% 75%,#3e7b70 0%,#285f63 35%,#17434f 65%,#123845 100%)}
   .sl.white{background:#fff;color:#0b2a5a}
   .tab{position:absolute;top:0;right:90px;width:75px;height:110px;background:#b01512;box-shadow:2px 3px 5px #0005}
@@ -152,6 +148,38 @@
   .s6 .lk a{display:inline-block;font-family:"Segoe UI","Noto Sans",Arial,sans-serif;font-weight:700;font-size:26px;color:#06323d;background:#ffe94d;padding:16px 34px;border-radius:999px;text-decoration:none;box-shadow:0 6px 22px #0007;transition:transform .15s}
   .s6 .lk a:hover{transform:translateY(-3px)}
   .s6 .lk a:focus-visible{outline:4px solid #fff;outline-offset:4px}
+
+  /* ===== Page-to-page animations ===== */
+  /* slide ↔ slide : old slide slides out, new one slides in */
+  @keyframes inR{from{opacity:0;transform:translateX(110px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes inL{from{opacity:0;transform:translateX(-110px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes outL{from{opacity:1;transform:none}to{opacity:0;transform:translateX(-110px) scale(.96)}}
+  @keyframes outR{from{opacity:1;transform:none}to{opacity:0;transform:translateX(110px) scale(.96)}}
+  .sl.on.fromR{animation:inR .55s cubic-bezier(.2,.8,.2,1) both}
+  .sl.on.fromL{animation:inL .55s cubic-bezier(.2,.8,.2,1) both}
+  .sl.out{display:block;pointer-events:none;z-index:0}
+  .s2.out{display:flex}
+  .sl.out.toL{animation:outL .45s ease-in both}
+  .sl.out.toR{animation:outR .45s ease-in both}
+  /* content of each slide rises in one by one */
+  @keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+  @keyframes drop{from{transform:translateY(-120px)}to{transform:none}}
+  @keyframes glow{from{text-shadow:0 0 0 #ffff0000}to{text-shadow:0 0 22px #ffff00aa}}
+  .sl.on.anim > *{animation:rise .65s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * .09s + .25s)}
+  .sl.on.anim > .tab{animation:drop .7s cubic-bezier(.2,.9,.3,1.25) both;animation-delay:.15s}
+  .s6.on.anim > .ty{animation:rise .8s cubic-bezier(.2,.8,.2,1) .25s both, glow 2.4s ease-in-out 1.2s infinite alternate}
+  /* screen ↔ screen (slides → start → quiz → result → thank you) */
+  @keyframes screenIn{from{opacity:0;transform:translateY(34px) scale(.96)}to{opacity:1;transform:none}}
+  @keyframes qIn{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:none}}
+  @keyframes bigPop{0%{opacity:0;transform:scale(.3)}60%{opacity:1;transform:scale(1.15)}100%{transform:scale(1)}}
+  .card.enter{animation:screenIn .6s cubic-bezier(.2,.8,.2,1) both}
+  #quiz.qenter{animation:qIn .45s cubic-bezier(.2,.8,.2,1) both}
+  #result.enter .big{animation:bigPop .8s .25s cubic-bezier(.2,.8,.2,1) both}
+  @media (prefers-reduced-motion:reduce){
+    .sl.on.anim > *,.s6.on.anim > .ty{animation:none!important}
+    .card.enter,#quiz.qenter,#result.enter .big{animation:none!important}
+    .sl.out{display:none!important}
+  }
 
 </style>
 </head>
@@ -262,15 +290,6 @@
           </tbody>
         </table>
       </div>
-
-      <!-- 6 -->
-      <div class="sl teal s6" aria-label="Thank you">
-        <div class="tab"></div>
-        <div class="ty">Thank U For Watching and Attention</div>
-        <div class="th my">ကျွန်တော်တို့ရဲ့ Lens Chapter (8) ကို အသေးစိတ် ဝင်ရောက်လေ့လာလိုပါက အောက်ပါ Link တွင် ဝင်ရောက်လေ့လာနိုင်ပါသည်။</div>
-        <div class="lk"><a id="projLink" href="https://milo202666-spec.github.io/Project/" target="_blank" rel="noopener noreferrer">🔗 https://milo202666-spec.github.io/Project/</a></div>
-      </div>
-
     </div></div>
     <div class="slidebar">
       <button class="btn ghost" id="prevBtn" type="button">← နောက်သို့</button>
@@ -312,7 +331,25 @@
     <div class="big" id="finalScore"></div>
     <h1 id="finalMsg" style="font-size:clamp(1.4rem,5vw,2rem)"></h1>
     <p id="finalSub"></p>
-    <p><button class="btn" id="againBtn">🔄 ပြန်ဖြေမယ်</button></p>
+    <p><button class="btn ghost" id="againBtn">🔄 ပြန်ဖြေမယ်</button> <button class="btn" id="toThanksBtn">🙏 ဆက်သွားမယ် →</button></p>
+  </section>
+
+  <!-- Thank you page – shown at the very end, after the quiz result -->
+  <section class="card slides hidden" id="thanks" aria-label="Thank you">
+    <div class="stage" id="stageT" style="cursor:default"><div class="sl-scale" id="slScaleT">
+      <!-- Thank you (very last page) -->
+      <div class="sl teal s6 on anim" id="thanksSlide" aria-label="Thank you">
+        <div class="tab"></div>
+        <div class="ty">Thank U For Watching and Attention</div>
+        <div class="th my">ကျွန်တော်တို့ရဲ့ Lens Chapter (8) ကို အသေးစိတ် ဝင်ရောက်လေ့လာလိုပါက အောက်ပါ Link တွင် ဝင်ရောက်လေ့လာနိုင်ပါသည်။</div>
+        <div class="lk"><a id="projLink" href="https://milo202666-spec.github.io/Project/" target="_blank" rel="noopener noreferrer">🔗 https://milo202666-spec.github.io/Project/</a></div>
+      </div>
+
+    </div></div>
+    <div class="slidebar" style="justify-content:center">
+      <button class="btn ghost" id="thanksSlidesBtn" type="button">📖 Slides ပြန်ကြည့်မယ်</button>
+      <button class="btn" id="thanksAgainBtn" type="button">🔄 Quiz ပြန်ဖြေမယ်</button>
+    </div>
   </section>
 </div>
 
@@ -456,7 +493,16 @@ let idx=0, score=0, locked=false;
 $("qCount").textContent=QUESTIONS.length;
 $("totalNum").textContent=QUESTIONS.length;
 
-function show(id){ ["slides","start","quiz","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); document.body.classList.toggle("wide",id==="slides"); if(id==="slides") requestAnimationFrame(fitStage); }
+function show(id){
+  ["slides","start","quiz","result","thanks"].forEach(s=>$(s).classList.toggle("hidden",s!==id));
+  document.body.classList.toggle("wide",id==="slides"||id==="thanks");
+  const el=$(id); el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
+  if(id==="slides"||id==="thanks") requestAnimationFrame(fitStage);
+  if(id==="thanks"){ playThanks(); setTimeout(()=>{ if(!$("thanks").classList.contains("hidden")) confetti(170); },450); }
+  window.scrollTo({top:0});
+}
+function playThanks(){ const t=$("thanksSlide"); t.classList.remove("anim"); void t.offsetWidth; t.classList.add("anim"); }
+function toStart(){ show("start"); $("barWrap").classList.add("hidden"); $("scorePill").classList.add("hidden"); }
 
 function start(){
   ac(); idx=0; score=0; $("scoreNum").textContent=0;
@@ -466,6 +512,7 @@ function start(){
 
 function render(){
   locked=false;
+  const qc=$("quiz"); qc.classList.remove("qenter"); void qc.offsetWidth; qc.classList.add("qenter");
   const Q=QUESTIONS[idx];
   $("bar").style.width=(idx/QUESTIONS.length*100)+"%";
   const same=QUESTIONS.filter(x=>x.type===Q.type), pos=same.indexOf(Q)+1;
@@ -540,7 +587,10 @@ function finish(){
 
 $("startBtn").addEventListener("click",start);
 $("nextBtn").addEventListener("click",next);
-$("againBtn").addEventListener("click",()=>{ show("start"); $("barWrap").classList.add("hidden"); $("scorePill").classList.add("hidden"); });
+$("againBtn").addEventListener("click",toStart);
+$("toThanksBtn").addEventListener("click",()=>{ show("thanks"); $("barWrap").classList.add("hidden"); $("scorePill").classList.add("hidden"); });
+$("thanksAgainBtn").addEventListener("click",toStart);
+$("thanksSlidesBtn").addEventListener("click",()=>openSlides(0));
 $("muteBtn").addEventListener("click",()=>{
   muted=!muted; $("muteBtn").textContent=muted?"🔇":"🔊";
   if(!muted) ac();
@@ -568,17 +618,25 @@ const SLIDES = SLIDE_EL.map(el=>({alt:el.getAttribute("aria-label")||""}));
 let si=0;
 (function buildDots(){ const d=$("dots"); SLIDES.forEach(()=>d.appendChild(document.createElement("i"))); })();
 function fitStage(){
-  const st=$("stage"); if(!st||!st.clientWidth) return;
-  $("slScale").style.transform="scale("+(st.clientWidth/1280)+")";
+  [["stage","slScale"],["stageT","slScaleT"]].forEach(([a,b])=>{
+    const st=$(a); if(!st||!st.clientWidth) return;
+    $(b).style.transform="scale("+(st.clientWidth/1280)+")";
+  });
 }
+/* index each slide's children so they can animate in one after another */
+document.querySelectorAll(".sl").forEach(sl=>[...sl.children].forEach((c,j)=>c.style.setProperty("--i",j)));
 addEventListener("resize",fitStage);
-if(window.ResizeObserver) new ResizeObserver(fitStage).observe($("stage"));
+if(window.ResizeObserver){ const ro=new ResizeObserver(fitStage); ro.observe($("stage")); ro.observe($("stageT")); }
 function showSlide(i,dir){
-  si=Math.max(0,Math.min(SLIDES.length-1,i));
+  const prev=si; si=Math.max(0,Math.min(SLIDES.length-1,i));
+  SLIDE_EL.forEach(el=>{ clearTimeout(el._t); el.classList.remove("on","anim","fromR","fromL","out","toL","toR"); });
+  void SLIDE_EL[0].offsetWidth;                       // restart animations
   SLIDE_EL.forEach((el,k)=>{
-    el.classList.remove("fromR","fromL");
-    el.classList.toggle("on",k===si);
-    if(k===si){ void el.offsetWidth; if(dir) el.classList.add(dir>0?"fromR":"fromL"); }
+    if(k===si){ el.classList.add("on","anim"); if(dir) el.classList.add(dir>0?"fromR":"fromL"); }
+    else if(dir && k===prev){                          // old slide leaves
+      el.classList.add("out",dir>0?"toL":"toR");
+      el._t=setTimeout(()=>el.classList.remove("out","toL","toR"),480);
+    }
   });
   fitStage();
   [...$("dots").children].forEach((d,k)=>d.classList.toggle("on",k===si));
