@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lenses Quiz – National Digital Awards 2026</title>
+<style>
+  :root{
+    --bg1:#0b2a33; --bg2:#14505a; --card:#0f3a44; --card2:#16505c;
+    --text:#f2fbfc; --muted:#9fc9d0; --title:#ffe94d; --q:#38c6f4;
+    --ok:#22c55e; --ok-bg:#0f4d2a; --bad:#ef4444; --bad-bg:#561616; --line:#2a7280;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    font-family:"Segoe UI","Noto Sans Myanmar","Myanmar Text","Padauk",system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 70% 10%,var(--bg2),var(--bg1) 70%) fixed;
+    color:var(--text); line-height:1.7; display:flex; justify-content:center; padding:20px 14px 40px;
+  }
+  .app{width:100%;max-width:880px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+  .brand{font-size:.95rem;color:var(--muted);letter-spacing:.02em}
+  .brand b{color:var(--title)}
+  .tools{display:flex;gap:8px;align-items:center}
+  .score-pill{background:var(--card);border:1px solid var(--line);padding:4px 14px;border-radius:999px;font-weight:600}
+  .icon-btn{background:var(--card);border:1px solid var(--line);color:var(--text);width:42px;height:42px;border-radius:50%;font-size:1.2rem;cursor:pointer}
+  .icon-btn:hover{background:var(--card2)}
+  .bar{height:8px;background:var(--card);border-radius:99px;overflow:hidden;margin-bottom:18px}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--q),var(--title));transition:width .4s}
+  .card{background:linear-gradient(180deg,var(--card),#0c313a);border:1px solid var(--line);border-radius:20px;padding:26px 24px;box-shadow:0 12px 40px #0006}
+  h1{margin:.1em 0 .2em;font-size:clamp(1.6rem,5vw,2.4rem);color:var(--title);line-height:1.25}
+  h2{margin:0 0 .3em;font-size:clamp(1.05rem,3.2vw,1.25rem);color:var(--muted);font-weight:600}
+  .tag{display:inline-block;background:#ffe94d22;color:var(--title);border:1px solid #ffe94d55;border-radius:999px;padding:2px 12px;font-size:.85rem;margin-bottom:12px}
+  .q{font-size:clamp(1.2rem,3.8vw,1.6rem);color:var(--q);font-weight:700;margin:6px 0 22px}
+  .opts{display:grid;gap:12px}
+  .opts.two{grid-template-columns:1fr 1fr}
+  @media (max-width:560px){.opts.two{grid-template-columns:1fr}}
+  .opt{
+    display:flex;align-items:center;gap:14px;text-align:left;width:100%;
+    background:var(--card2);color:var(--text);border:2px solid var(--line);border-radius:14px;
+    padding:14px 16px;font:inherit;font-size:clamp(1.05rem,3.4vw,1.3rem);cursor:pointer;
+    transition:transform .12s,background .15s,border-color .15s;
+  }
+  .opt:hover:not(:disabled){transform:translateY(-2px);border-color:var(--q);background:#1c6070}
+  .opt:focus-visible,.btn:focus-visible,.icon-btn:focus-visible{outline:3px solid var(--title);outline-offset:2px}
+  .opt .k{flex:none;width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#0b2a33;color:var(--title);font-weight:800;border:1px solid var(--line)}
+  .opt:disabled{cursor:default}
+  .opt.correct{background:var(--ok-bg);border-color:var(--ok);animation:pop .5s}
+  .opt.correct .k{background:var(--ok);color:#052e16;border-color:var(--ok)}
+  .opt.wrong{background:var(--bad-bg);border-color:var(--bad);animation:shake .45s}
+  .opt.wrong .k{background:var(--bad);color:#fff;border-color:var(--bad)}
+  .opt.dim{opacity:.55}
+  .tf .opt{justify-content:center;font-weight:800;font-size:clamp(1.3rem,4.5vw,1.8rem);padding:22px}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.04)}100%{transform:scale(1)}}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+  .fb{margin-top:20px;border-radius:14px;padding:16px 18px;display:none}
+  .fb.show{display:block;animation:pop .4s}
+  .fb.ok{background:var(--ok-bg);border:1px solid var(--ok)}
+  .fb.no{background:var(--bad-bg);border:1px solid var(--bad)}
+  .fb .head{font-size:1.35rem;font-weight:800;margin-bottom:4px}
+  .fb .ans{font-weight:700;margin-bottom:6px}
+  .fb .why{color:#dff3f6}
+  .fb code{background:#0006;padding:1px 7px;border-radius:6px;font-family:Consolas,monospace}
+  .row{display:flex;justify-content:flex-end;margin-top:18px}
+  .btn{background:var(--title);color:#1a2b00;border:0;border-radius:12px;padding:13px 26px;font:inherit;font-size:1.1rem;font-weight:800;cursor:pointer;transition:transform .12s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.ghost{background:transparent;color:var(--text);border:2px solid var(--line)}
+  .center{text-align:center}
+  .big{font-size:clamp(3rem,14vw,5.5rem);font-weight:900;color:var(--title);line-height:1.1;margin:8px 0}
+  .credits{margin-top:20px;color:var(--muted);font-size:.9rem}
+  .hint{color:var(--muted);font-size:.85rem;margin-top:14px}
+  .hidden{display:none!important}
+  canvas#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+  @media (prefers-reduced-motion:reduce){.opt.wrong,.opt.correct,.fb.show{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<div class="app">
+  <header>
+    <div class="brand"><b>National Digital Awards 2026</b> · Grade 11 Physics · Chapter 8 (Lenses)</div>
+    <div class="tools">
+      <span class="score-pill hidden" id="scorePill">⭐ <span id="scoreNum">0</span> / <span id="totalNum">0</span></span>
+      <button class="icon-btn" id="muteBtn" aria-label="အသံ ဖွင့်/ပိတ်" title="အသံ ဖွင့်/ပိတ်">🔊</button>
+    </div>
+  </header>
+
+  <div class="bar hidden" id="barWrap"><i id="bar"></i></div>
+
+  <!-- Start screen -->
+  <section class="card center" id="start">
+    <div class="tag">Educational Project &amp; Skills Competition</div>
+    <h1>Lenses Quiz 🔍</h1>
+    <h2>မှန်ဘီလူး (Lenses) – မေးခွန်းဖြေဆိုပွဲ</h2>
+    <p>မေးခွန်း <b id="qCount"></b> ခုရှိပါတယ်။ အဖြေရွေးလိုက်တာနဲ့ မှန်/မှား ချက်ချင်း သိရမှာဖြစ်ပြီး<br>
+       မှန်ရင် 🎉 အောင်ပွဲခံသံ၊ မှားရင် ❌ မှားတဲ့အသံ ထွက်ပါမယ်။</p>
+    <p><button class="btn" id="startBtn">စတင်မယ် ▶</button></p>
+    <p class="hint">Keyboard: True = <b>T</b>, False = <b>F</b>, MCQ = <b>A–D</b>, နောက်တစ်ခု = <b>Enter</b></p>
+    <p class="credits">Leader – Han Htoo Zaw · Team – Nyo Min Khant, ZayYarLin</p>
+  </section>
+
+  <!-- Question screen -->
+  <section class="card hidden" id="quiz">
+    <div class="tag" id="qTag"></div>
+    <div class="q" id="qText"></div>
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb" role="status" aria-live="polite">
+      <div class="head" id="fbHead"></div>
+      <div class="ans" id="fbAns"></div>
+      <div class="why" id="fbWhy"></div>
+    </div>
+    <div class="row"><button class="btn hidden" id="nextBtn">နောက်မေးခွန်း →</button></div>
+  </section>
+
+  <!-- Result screen -->
+  <section class="card center hidden" id="result">
+    <div class="tag">ရလဒ်</div>
+    <div class="big" id="finalScore"></div>
+    <h1 id="finalMsg" style="font-size:clamp(1.4rem,5vw,2rem)"></h1>
+    <p id="finalSub"></p>
+    <p><button class="btn" id="againBtn">🔄 ပြန်ဖြေမယ်</button></p>
+  </section>
+</div>
+
+<script>
+/* ============================================================
+   QUESTIONS
+   answer: for "tf" → true/false ; for "mcq" → index (0=A … 3=D)
+   ------------------------------------------------------------
+   NOTE: PowerPoint slide 6 highlights C (Q1) and D (Q2), but
+   calculation gives D (Q1) and C (Q2) – see the explanations.
+   If you want to follow the slide's highlights instead, change
+   the two `answer` values below (Q1 → 2, Q2 → 3).
+   ============================================================ */
+const QUESTIONS = [
+  { type:"tf",
+    q:"Distance of virtual object, virtual image and virtual focus are negative.",
+    answer:true,
+    why:"Real-is-positive sign convention အရ virtual object၊ virtual image၊ virtual focus တို့ရဲ့ အကွာအဝေးတွေက အနှုတ် (negative) ဖြစ်ပါတယ်။" },
+  { type:"tf",
+    q:"The focus of convex lens is real.",
+    answer:true,
+    why:"Convex lens က အပြိုင်အလင်းတန်းတွေကို စုစည်း (converge) စေလို့ focus က အစစ်အမှန် (real) ဖြစ်ပါတယ်။" },
+  { type:"tf",
+    q:"The SI Unit of the power of a lens is watt.",
+    answer:false,
+    why:"မှန်ဘီလူးရဲ့ power ရဲ့ SI unit က <code>dioptre (D)</code> ဖြစ်ပါတယ်။ watt က စွမ်းအား (energy rate) ရဲ့ unit ပါ။" },
+  { type:"mcq",
+    q:"When a pencil 10 cm long is placed vertically 100 cm from a lens of focal length +50 cm, the image is",
+    options:["erect and 5 cm tall.","inverted and 5 cm tall.","erect and 10 cm tall.","inverted and 10 cm tall."],
+    answer:3,
+    why:"<code>1/v = 1/f − 1/u</code> မှာ u = 100၊ f = 50 → <code>1/v = 1/50 − 1/100 = 1/100</code> ဖြစ်လို့ v = 100 cm။ ပုံကြီးမှုနှုန်း <code>m = v/u = 1</code> ဖြစ်လို့ ပုံအရွယ်က 10 cm၊ ပုံက real image ဖြစ်လို့ ပြောင်းပြန် (inverted) ဖြစ်ပါတယ်။" },
+  { type:"mcq",
+    q:"An object is 10 cm from a lens. The image of the object is formed on the same side as the object. If the image is 10 cm from the object, the focal length of the lens is",
+    options:["+ 6.7 cm.","6.7 cm.","+ 20 cm.","−20 cm."],
+    answer:2,
+    why:"ပုံက object နဲ့ တစ်ဖက်တည်းမှာဖြစ်ပြီး object ကနေ 10 cm ကွာတာမို့ ပုံက lens ကနေ 20 cm (virtual image → v = −20)။ <code>1/f = 1/u + 1/v = 1/10 − 1/20 = 1/20</code> ဖြစ်လို့ f = +20 cm ဖြစ်ပါတယ်။" },
+  { type:"mcq",
+    q:"A lens has at least ____ curved surface.",
+    options:["one","two","three"],
+    answer:0,
+    why:"မှန်ဘီလူးတစ်ခုမှာ ကွေးတဲ့မျက်နှာပြင် အနည်းဆုံး <code>တစ်ခု (one)</code> ရှိရပါမယ်။ ဥပမာ plano-convex နဲ့ plano-concave lens တွေမှာ တစ်ဖက်က ပြား၊ တစ်ဖက်က ကွေးပါတယ်။" },
+  { type:"mcq",
+    q:"Since the divergent rays do not actually pass through that point, the focus of the concave lens is ____.",
+    options:["real","virtual","imaginary"],
+    answer:1,
+    why:"Concave lens က အလင်းတန်းတွေကို ကွဲထွက် (diverge) စေပါတယ်။ အလင်းတန်းတွေ အမှန်တကယ် ဖြတ်မသွားဘဲ နောက်ပြန်ဆွဲဆန့်မှ ဆုံတာမို့ focus က <code>virtual</code> ဖြစ်ပါတယ်။" },
+  { type:"mcq",
+    q:"A ray passing through the centre of lens emerges in the ____ direction.",
+    options:["opposite","same","parallel"],
+    answer:1,
+    why:"မှန်ဘီလူးရဲ့ optical centre ကို ဖြတ်သွားတဲ့ အလင်းတန်းက မယိုင်ဘဲ မူလ ဦးတည်ရာအတိုင်း <code>same direction</code> နဲ့ ဆက်ထွက်သွားပါတယ်။" }
+];
+
+/* ============================================================
+   SOUND (Web Audio – no external files)
+   ============================================================ */
+let ctx=null, muted=false;
+function ac(){
+  if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; ctx=new AC(); }
+  if(ctx.state==="suspended") ctx.resume();
+  return ctx;
+}
+function tone(freq,start,dur,type="triangle",vol=.25){
+  const c=ac(); if(!c||muted) return;
+  const t=c.currentTime+start, o=c.createOscillator(), g=c.createGain();
+  o.type=type; o.frequency.setValueAtTime(freq,t);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol,t+.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+.05);
+}
+function clap(start,vol=.18){
+  const c=ac(); if(!c||muted) return;
+  const t=c.currentTime+start, len=Math.floor(c.sampleRate*.12);
+  const buf=c.createBuffer(1,len,c.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3);
+  const s=c.createBufferSource(); s.buffer=buf;
+  const f=c.createBiquadFilter(); f.type="bandpass"; f.frequency.value=1200+Math.random()*1800; f.Q.value=.8;
+  const g=c.createGain(); g.gain.value=vol;
+  s.connect(f).connect(g).connect(c.destination); s.start(t);
+}
+function playCorrect(){            // 🎉 fanfare + sparkle + applause
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*.11,.28,"triangle",.28));
+  [523.25,659.25,783.99,1046.5].forEach(f=>tone(f,.5,1.1,"triangle",.14));
+  [1568,2093,2637].forEach((f,i)=>tone(f,.65+i*.12,.35,"sine",.1));
+  for(let i=0;i<22;i++) clap(.5+Math.random()*1.4, .08+Math.random()*.1);
+}
+function playWrong(){              // ❌ descending "womp womp"
+  tone(196,0,.32,"sawtooth",.2);
+  tone(185,.34,.32,"sawtooth",.2);
+  tone(147,.68,.75,"sawtooth",.22);
+  tone(73.4,.68,.75,"square",.08);
+}
+function playWin(){                // final celebration
+  const seq=[523.25,523.25,523.25,659.25,783.99,659.25,783.99,1046.5];
+  const dur=[.12,.12,.12,.3,.15,.15,.15,.8];
+  let t=0; seq.forEach((f,i)=>{ tone(f,t,dur[i]+.1,"triangle",.28); tone(f/2,t,dur[i]+.1,"sine",.12); t+=dur[i]+.04; });
+  for(let i=0;i<40;i++) clap(.3+Math.random()*2.4, .08+Math.random()*.1);
+}
+function playTryAgain(){ tone(392,0,.25,"triangle",.22); tone(330,.25,.25,"triangle",.22); tone(262,.5,.6,"triangle",.22); }
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+const cv=document.getElementById("fx"), cx=cv.getContext("2d");
+let parts=[], raf=null;
+const reduceMotion=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function sizeCanvas(){ cv.width=innerWidth*devicePixelRatio; cv.height=innerHeight*devicePixelRatio; }
+addEventListener("resize",sizeCanvas); sizeCanvas();
+function confetti(n=140){
+  if(reduceMotion) return;
+  const cols=["#ffe94d","#38c6f4","#22c55e","#f472b6","#fb923c","#a78bfa"];
+  for(let i=0;i<n;i++){
+    parts.push({x:innerWidth*(.2+Math.random()*.6),y:innerHeight*.25,
+      vx:(Math.random()-.5)*14,vy:-Math.random()*13-3,g:.35,
+      w:6+Math.random()*7,h:8+Math.random()*10,r:Math.random()*6,vr:(Math.random()-.5)*.4,
+      c:cols[i%cols.length],life:140+Math.random()*60});
+  }
+  if(!raf) raf=requestAnimationFrame(tick);
+}
+function tick(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  const s=devicePixelRatio;
+  parts=parts.filter(p=>p.life>0&&p.y<innerHeight+40);
+  for(const p of parts){
+    p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.vx*=.99; p.r+=p.vr; p.life--;
+    cx.save(); cx.translate(p.x*s,p.y*s); cx.rotate(p.r);
+    cx.fillStyle=p.c; cx.globalAlpha=Math.min(1,p.life/40);
+    cx.fillRect(-p.w*s/2,-p.h*s/2,p.w*s,p.h*s); cx.restore();
+  }
+  raf=parts.length?requestAnimationFrame(tick):null;
+  if(!raf) cx.clearRect(0,0,cv.width,cv.height);
+}
+
+/* ============================================================
+   QUIZ LOGIC
+   ============================================================ */
+const $=id=>document.getElementById(id);
+let idx=0, score=0, locked=false;
+
+$("qCount").textContent=QUESTIONS.length;
+$("totalNum").textContent=QUESTIONS.length;
+
+function show(id){ ["start","quiz","result"].forEach(s=>$(s).classList.toggle("hidden",s!==id)); }
+
+function start(){
+  ac(); idx=0; score=0; $("scoreNum").textContent=0;
+  $("scorePill").classList.remove("hidden"); $("barWrap").classList.remove("hidden");
+  show("quiz"); render();
+}
+
+function render(){
+  locked=false;
+  const Q=QUESTIONS[idx];
+  $("bar").style.width=(idx/QUESTIONS.length*100)+"%";
+  const same=QUESTIONS.filter(x=>x.type===Q.type), pos=same.indexOf(Q)+1;
+  $("qTag").textContent=(Q.type==="tf"?"TRUE OR FALSE":"MULTIPLE CHOICE")+" · "+pos+" / "+same.length;
+  $("qText").textContent=Q.q;
+  $("fb").className="fb"; $("nextBtn").classList.add("hidden");
+  const box=$("opts"); box.innerHTML="";
+  if(Q.type==="tf"){
+    box.className="opts two tf";
+    [["True",true,"T"],["False",false,"F"]].forEach(([label,val,key])=>{
+      box.appendChild(makeOpt(key,label,()=>answer(val)));
+    });
+  }else{
+    box.className="opts"+(Q.options.length===4?" two":"");
+    Q.options.forEach((t,i)=>box.appendChild(makeOpt("ABCD"[i],t,()=>answer(i))));
+  }
+}
+function makeOpt(key,label,fn){
+  const b=document.createElement("button");
+  b.className="opt"; b.type="button"; b.dataset.key=key;
+  if(key==="T"||key==="F"){ b.innerHTML=(key==="T"?"✔ ":"✘ ")+label; }
+  else{ b.innerHTML='<span class="k">'+key+'</span><span></span>'; b.lastChild.textContent=label; }
+  b.addEventListener("click",fn);
+  return b;
+}
+
+function answer(choice){
+  if(locked) return; locked=true;
+  const Q=QUESTIONS[idx], btns=[...$("opts").children];
+  const ok = choice===Q.answer;
+  const pickedIdx = Q.type==="tf" ? (choice?0:1) : choice;
+  const correctIdx= Q.type==="tf" ? (Q.answer?0:1) : Q.answer;
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correctIdx) b.classList.add("correct");
+    else if(i===pickedIdx) b.classList.add("wrong");
+    else b.classList.add("dim");
+  });
+  const correctLabel = Q.type==="tf" ? (Q.answer?"True":"False") : "ABCD"[Q.answer]+". "+Q.options[Q.answer];
+  const fb=$("fb");
+  fb.className="fb show "+(ok?"ok":"no");
+  $("fbHead").textContent= ok ? "🎉 မှန်ပါတယ်! ဂုဏ်ယူပါတယ်!" : "❌ မှားသွားပါတယ်";
+  $("fbAns").textContent = "အဖြေမှန်: "+correctLabel;
+  $("fbWhy").innerHTML = Q.why;
+  if(ok){ score++; $("scoreNum").textContent=score; playCorrect(); confetti(); }
+  else{ playWrong(); if(navigator.vibrate) navigator.vibrate(200); }
+  const last = idx===QUESTIONS.length-1;
+  $("nextBtn").textContent = last ? "ရလဒ်ကြည့်မယ် 🏆" : "နောက်မေးခွန်း →";
+  $("nextBtn").classList.remove("hidden");
+  $("nextBtn").focus({preventScroll:true});
+  fb.scrollIntoView({behavior:reduceMotion?"auto":"smooth",block:"nearest"});
+}
+
+function next(){
+  if(idx<QUESTIONS.length-1){ idx++; render(); window.scrollTo({top:0}); }
+  else finish();
+}
+
+function finish(){
+  $("bar").style.width="100%";
+  show("result");
+  const n=QUESTIONS.length, pct=score/n;
+  $("finalScore").textContent=score+" / "+n;
+  let msg,sub;
+  if(score===n){ msg="ပြည့်စုံပါတယ်! 🏆 အမှတ်အပြည့်!"; sub="Lens chapter ကို အပြည့်အဝ နားလည်ထားတာ တော်လိုက်တာ!"; }
+  else if(pct>=.6){ msg="ကောင်းပါတယ်! 👏"; sub="နည်းနည်းပဲ လိုတော့တယ်၊ မှားတဲ့ဟာတွေကို ပြန်ကြည့်ကြည့်ပါ။"; }
+  else{ msg="ဆက်ကြိုးစားပါဦး 💪"; sub="Chapter 8 ကို ပြန်လေ့လာပြီး ထပ်ဖြေကြည့်ပါ။"; }
+  $("finalMsg").textContent=msg; $("finalSub").textContent=sub;
+  if(pct>=.6){ playWin(); confetti(220); setTimeout(()=>confetti(160),600); }
+  else playTryAgain();
+}
+
+$("startBtn").addEventListener("click",start);
+$("nextBtn").addEventListener("click",next);
+$("againBtn").addEventListener("click",()=>{ show("start"); $("barWrap").classList.add("hidden"); $("scorePill").classList.add("hidden"); });
+$("muteBtn").addEventListener("click",()=>{
+  muted=!muted; $("muteBtn").textContent=muted?"🔇":"🔊";
+  if(!muted) ac();
+});
+
+addEventListener("keydown",e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey) return;
+  const k=e.key.toUpperCase();
+  const quizOn=!$("quiz").classList.contains("hidden");
+  if(quizOn && !locked){
+    const b=[...$("opts").children].find(x=>x.dataset.key===k);
+    if(b){ b.click(); e.preventDefault(); }
+  }else if(e.key==="Enter"){
+    if(quizOn && locked){ next(); e.preventDefault(); }
+  }
+});
+</script>
+</body>
+</html>
